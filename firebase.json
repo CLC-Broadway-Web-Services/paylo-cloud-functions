@@ -1,0 +1,52 @@
+{
+  "firestore": {
+    "region": "asia-south1",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "functions": {
+    "region": "asia-south1",
+    "predeploy": [],
+    "source": "functions"
+  },
+  "hosting": {
+    "region": "asia-south1",
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/callemailverified",
+        "function": "callemailverified"
+      }
+    ]
+  },
+  "storage": {
+    "region": "asia-south1",
+    "rules": "storage.rules"
+  },
+  "remoteconfig": {
+    "region": "asia-south1",
+    "template": "remoteconfig.template.json"
+  },
+  "emulators": {
+    "functions": {
+      "port": 5001
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "hosting": {
+      "port": 5000
+    },
+    "storage": {
+      "port": 9199
+    },
+    "ui": {
+      "enabled": true
+    }
+  }
+}

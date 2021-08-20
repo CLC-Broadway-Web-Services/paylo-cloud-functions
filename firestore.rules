@@ -1,0 +1,82 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /inviteCodes/{document} {
+      allow read;
+    }
+
+    match /users/{itemId} {
+
+      allow read: if isOwner(resource.data) &&
+      isSignedIn();
+
+      allow create: if isSignedIn() &&
+      isValidRequestData(request.resource.data);
+
+      allow update: if isOwner(resource.data) &&
+      isSignedIn();
+
+      allow delete: if isOwner(resource.data) &&
+      isSignedIn();
+    }
+
+
+    match /{path=**}/tasks/{itemId}{
+
+      allow read: if isOwner(resource.data) &&
+      isSignedIn();
+
+      allow update: if isOwner(resource.data) &&
+      isSignedIn();
+
+    }
+    match /pointsWallet/{itemId}{
+
+      allow read: if isOwner(resource.data) &&
+      isSignedIn();
+
+      allow create: if isSignedIn() &&
+      isValidRequestData(request.resource.data);
+
+      allow update: if isOwner(resource.data) &&
+      isSignedIn();
+    }
+
+    match /pointsConvertion/{itemId}{
+
+      allow read: if isOwner(resource.data) &&
+      isSignedIn();
+
+      allow create: if isOwner(request.resource.data) &&
+      isSignedIn();
+
+      allow update: if isAdmin();
+
+      allow delete: if isAdmin();
+
+    }
+
+    // FUNCTIONS
+    function isSignedIn() {
+      return request.auth != null || request.auth.token.admin == true;
+    }
+    function isOwner(requestData) {
+      return request.auth.uid == requestData.uid;
+    }
+
+    function isValidRequestData(requestData) {
+      return (
+      requestData.uid ==  request.auth.uid &&
+      requestData.uid is string &&
+      requestData.uid != '' 
+      );
+    }
+    function isAdmin() {
+      return request.auth.token.admin == true;
+    }
+
+  }
+}
+
+
