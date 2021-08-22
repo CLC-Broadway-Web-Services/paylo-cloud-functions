@@ -4,8 +4,19 @@ service cloud.firestore {
 
     match /inviteCodes/{document} {
       allow read;
+      allow read, create, update, delete: if isAdmin(request.auth.uid);
     }
 
+    match /counts/{document=**} {
+      allow read: if isAdmin(request.auth.uid);
+    }
+    match /company/{document=**} {
+      allow read, create, update, delete: if isAdmin(request.auth.uid);
+    }
+    match /campaign/{document=**} {
+      allow read;
+      allow create, update, delete: if isAdmin(request.auth.uid);
+    }
     match /users/{itemId} {
 
       allow read: if isOwner(resource.data) &&
@@ -19,6 +30,7 @@ service cloud.firestore {
 
       allow delete: if isOwner(resource.data) &&
       isSignedIn();
+      allow read, create, update, delete: if isAdmin(request.auth.uid);
     }
 
 
@@ -29,6 +41,7 @@ service cloud.firestore {
 
       allow update: if isOwner(resource.data) &&
       isSignedIn();
+      allow read, create, update, delete: if isAdmin(request.auth.uid);
 
     }
     match /pointsWallet/{itemId}{
@@ -41,6 +54,7 @@ service cloud.firestore {
 
       allow update: if isOwner(resource.data) &&
       isSignedIn();
+      allow read, create, update, delete: if isAdmin(request.auth.uid);
     }
 
     match /pointsConvertion/{itemId}{
@@ -51,9 +65,10 @@ service cloud.firestore {
       allow create: if isOwner(request.resource.data) &&
       isSignedIn();
 
-      allow update: if isAdmin();
+      allow update: if isAdmin(request.auth.uid);
 
-      allow delete: if isAdmin();
+      allow delete: if isAdmin(request.auth.uid);
+      allow read, create, update, delete: if isAdmin(request.auth.uid);
 
     }
 
@@ -72,11 +87,9 @@ service cloud.firestore {
       requestData.uid != '' 
       );
     }
-    function isAdmin() {
-      return request.auth.token.admin == true;
-    }
+    function isAdmin(uid){
+    	return get(/databases/$(database)/documents/users/$(uid)).data.claim == 'admin'
+		}
 
   }
 }
-
-
