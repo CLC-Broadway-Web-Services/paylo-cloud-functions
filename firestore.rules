@@ -6,7 +6,18 @@ service cloud.firestore {
       allow read;
       allow read, create, update, delete: if isAdmin(request.auth.uid);
     }
+    match /settings/app {
+      allow read;
+      allow create, update, delete: if isAdmin(request.auth.uid);
+    }
 
+    match /{path=**}/stats/{itemId} {
+      allow read: if isAdmin(request.auth.uid);
+    }
+    match /settings/{document=**} {
+      allow read;
+      allow create, update, delete: if isAdmin(request.auth.uid);
+    }
     match /counts/{document=**} {
       allow read: if isAdmin(request.auth.uid);
     }
@@ -67,7 +78,6 @@ service cloud.firestore {
 
       allow update: if isAdmin(request.auth.uid);
 
-      allow delete: if isAdmin(request.auth.uid);
       allow read, create, update, delete: if isAdmin(request.auth.uid);
 
     }
