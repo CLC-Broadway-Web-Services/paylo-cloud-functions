@@ -325,7 +325,7 @@ exports.countOnCompanyDelete = functions
 exports.onCreateWithdrawalRequest = functions
     .region(defaultRegion)
     .firestore.document('pointsConvertion/{docId}')
-    .onCreate(async(snap, context) => {
+    .onCreate(async (snap, context) => {
         const requestId = await context.params.docId;
         firestore.doc(`pointsConvertion/${requestId}`).set({ id: requestId }, { merge: true });
     });
@@ -655,7 +655,7 @@ exports.onUpdateTaskCounting = functions
 
         const alltasksStatsRef = campaignRef.doc(`${campaignId}/stats/alltasksStats`);
         const alltasksStatsData = await alltasksStatsRef.get();
-        const userData = { date: getTodayEpoch(), uid: userId, taskid: taskId }
+        const userData = { uid: userId, taskid: taskId }
         if (alltasksStatsData.exists) {
             if (newData.isSubmitted !== previousData.isSubmitted && newData.isSubmitted == true) {
                 alltasksStatsRef.update({
@@ -665,13 +665,10 @@ exports.onUpdateTaskCounting = functions
                 });
             }
             if (newData.isApproved !== previousData.isApproved && newData.isApproved == true) {
-                const userDataToRemoveFromSubmitted = alltasksStatsData.submittedTasksUsers.forEach((data) => {
-                    return data.uid == userId;
-                });
                 alltasksStatsRef.update({
                     // remove & decrement from submitted
                     submittedTasks: admin.firestore.FieldValue.increment(-1),
-                    submittedTasksUsers: admin.firestore.FieldValue.arrayRemove(userDataToRemoveFromSubmitted[0]),
+                    submittedTasksUsers: admin.firestore.FieldValue.arrayRemove(userData),
                     approvedTasks: admin.firestore.FieldValue.increment(1),
                     approvedTasksUsers: admin.firestore.FieldValue.arrayUnion(userData),
                     lastUpdated: Date.now(),
@@ -707,26 +704,20 @@ exports.onUpdateTaskCounting = functions
                     });
             }
             if (newData.isRejected !== previousData.isRejected && newData.isRejected == true) {
-                const userDataToRemoveFromSubmitted = alltasksStatsData.submittedTasksUsers.forEach((data) => {
-                    return data.uid == userId;
-                });
                 alltasksStatsRef.update({
                     // remove & decrement from submitted
                     submittedTasks: admin.firestore.FieldValue.increment(-1),
-                    submittedTasksUsers: admin.firestore.FieldValue.arrayRemove(userDataToRemoveFromSubmitted[0]),
+                    submittedTasksUsers: admin.firestore.FieldValue.arrayRemove(userData),
                     isRejected: admin.firestore.FieldValue.increment(1),
                     rejectedTasksUsers: admin.firestore.FieldValue.arrayUnion(userData),
                     lastUpdated: Date.now(),
                 });
             }
             if (newData.isExpired !== previousData.isExpired && newData.isExpired == true) {
-                const userDataToRemoveFromAlloted = alltasksStatsData.allotedTasksUsers.forEach((data) => {
-                    return data.uid == userId;
-                });
                 alltasksStatsRef.update({
                     // remove & decrement from alloted
                     allotedTasks: admin.firestore.FieldValue.increment(-1),
-                    allotedTasksUsers: admin.firestore.FieldValue.arrayRemove(userDataToRemoveFromAlloted[0]),
+                    allotedTasksUsers: admin.firestore.FieldValue.arrayRemove(userData),
                     isExpired: admin.firestore.FieldValue.increment(1),
                     expiredTasksUsers: admin.firestore.FieldValue.arrayUnion(userData),
                     lastUpdated: Date.now(),
